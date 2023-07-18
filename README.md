@@ -34,11 +34,17 @@ That node should contain a single value named "sentence", containing the UKHAS f
 
 That sentence should contain the callsign, an (ignored) counter, an (ignored, currently) timestamp, latitude, longitude and altitude.  Further fields including any CRC are ignored.
 
-This example shows the above:
+So for example you could use a path of:
 
+payloads/
 
+which contains an entry
 
-![image-20230718112546412](C:\Users\dave\AppData\Roaming\Typora\typora-user-images\image-20230718112546412.png)
+MQTT
+
+with a single value of
+
+sentence = $MQTT,123,10:11:12,55.123,-2.90,128
 
 
 
