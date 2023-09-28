@@ -5,6 +5,7 @@ import sys
 import fcntl
 import time
 import json
+import ast
 from datetime import datetime
 from sondehub.amateur import Uploader
 
@@ -27,18 +28,36 @@ def UploadTelemetry(Sentence):
     print('Uploading ' + Callsign + ',' + TimeAndDate + ',' + str(Latitude) + ',' + str(Longitude) + ',' + str(Altitude))
 
     uploader.add_telemetry(Callsign, TimeAndDate, Latitude, Longitude, Altitude)
-        
+
+def UploadChase(PayloadID, Position):
+    global uploader
+
+    Values = ast.literal_eval(Position)
+
+    TimeAndDate = datetime.now().isoformat()
+    
+    Latitude = Values['lat']
+    Longitude = Values['lon']
+    Altitude = Values['alt']
+
+    print('Uploading ' + PayloadID + ',' + str(Latitude) + ',' + str(Longitude) + ',' + str(Altitude))
+
+    uploader.upload_station_position(PayloadID, [Latitude, Longitude, Altitude], mobile=True)
+
+
+
 def on_message(client, userdata, message):
     value = str(message.payload.decode("utf-8"))
     
     print("received topic   = ", message.topic)
+    # received topic   =  incoming/chase/SETTY_Chase
+  
     print("received message = ", value)
+    # received message =  {'time': '10:54:04', 'lat': '51.95032', 'lon': '-2.54436', 'alt': '140', 'sats': 8}
     
-    # incoming/payloads/MQTT/sentence
-
     fields = message.topic.split('/')
-
     print(fields)
+    # ['incoming', 'chase', 'SETTY_Chase']
     
     PayloadType = fields[1]
     PayloadID = fields[2]
@@ -49,7 +68,11 @@ def on_message(client, userdata, message):
 
         if Field == 'sentence':
             print(value)
-            UploadTelemetry(value)
+            # UploadTelemetry(value)
+    elif PayloadType == 'chase':
+        print('Received chase position for ' + PayloadID)
+
+        UploadChase(PayloadID, value)
          
 
 def RunLoop():
